@@ -1,1 +1,5 @@
 artifacts/
+1_Storage.sol
+2_Owner.sol
+3_Ballot.sol
+.deps
