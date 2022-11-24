@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma experimental ABIEncoderV2;
 pragma solidity >=0.7.0 <0.9.0;
+
+import "hardhat/console.sol";
 
 library GuardsLib {
 
@@ -49,17 +50,6 @@ contract RailRoadSystem {
     address private owner;
     uint256 private purchaseCardCounts;
 
-
-    constructor (address payable _owner) {
-        owner = _owner;
-    }
-
-
-    // *************************************************************
-    // Storage
-    // *************************************************************
-
-
     // cardId => Card
     mapping(string => CardLib.Card) public cards;
 
@@ -70,27 +60,20 @@ contract RailRoadSystem {
     mapping(address => uint256) public customerPurchasedCard; 
 
 
-
-    // *************************************************************
-    // Events
-    // *************************************************************
-    
+    event OwnerSet(address indexed oldOwner, address indexed newOwner);
     event NewCard(string indexed name, uint256 indexed price);
 
 
-    // *************************************************************
-    // Modifier
-    // *************************************************************
-
-    // TODO : ..
     modifier onlyOwner {
         require(msg.sender == owner, "only Owner can invoke the function");
         _;
     }
 
-    // *************************************************************
-    // Functions
-    // *************************************************************
+    constructor () {
+        console.log("Owner contract deployed by:", msg.sender);
+        owner = payable(msg.sender);
+        emit OwnerSet(address(0), owner);
+    }
 
     function addPurchasedCard(address _user, string memory _cardId) 
     internal returns(uint256){
