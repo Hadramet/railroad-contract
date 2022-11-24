@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "hardhat/console.sol";
-
 library GuardsLib {
 
     function guardAgainstEmptyString(string memory args) public pure returns(bool){
@@ -43,6 +41,25 @@ library CardLib {
         uint256 createdAt;
     }
 
+    enum Status { PENDING, COMPLETED, CANCEL }
+
+    struct CardPuchasedTransaction{
+        uint256 id;
+        
+        string  cardPurchasedId;
+        string  cardPurchasedName;
+        uint256 cardPurchasedPrice;
+        string  cardPurchasedImageUri;
+        string  cardPurchasedDescription;
+
+        uint256 Price; // Selling price specified by card owner        
+        address Owner;
+        address Buyer;
+        Status  State;
+        bool    lock;
+        uint256 lockedAt;
+        uint256 createdAt;
+    }
 }
 
 contract RailRoadSystem {
@@ -50,15 +67,16 @@ contract RailRoadSystem {
     address private owner;
     uint256 private purchaseCardCounts;
 
+    
     // cardId => Card
     mapping(string => CardLib.Card) public cards;
 
-    // purchasedCardId => CardPurchased
-    mapping(uint256 => CardLib.CardPurchased ) private purchasedCards;
+    
+    mapping(address => bool) isCustomer;
     
     // customerAddress => purchasedCardId
-    mapping(address => uint256) public customerPurchasedCard; 
-
+    mapping(address => CardLib.CardPurchased[] ) public customerPurchasedCard;
+    mapping(uint256 => CardLib.CardPurchased) private _cardPurchased;
 
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
     event NewCard(string indexed name, uint256 indexed price);
@@ -69,11 +87,31 @@ contract RailRoadSystem {
         _;
     }
 
+    modifier onlyCustomer() {
+        require(
+            isCustomer[msg.sender],
+            "Only customer that have already bought some cards."
+        );
+        _;
+    }
+
     constructor () {
-        console.log("Owner contract deployed by:", msg.sender);
         owner = payable(msg.sender);
         emit OwnerSet(address(0), owner);
     }
+
+    // TODO : get list of purchased card for user
+    function getCardPurchased() public view onlyCustomer returns(CardLib.CardPurchased[] memory){
+        uint256 cardsPurchasedCount = customerPurchasedCard[msg.sender].length;
+        
+        CardLib.CardPurchased[] memory cardsPurchased = new CardLib.CardPurchased[](cardsPurchasedCount);
+        for (uint256 i = 0; i < cardsPurchasedCount; i++) {
+            cardsPurchased[i] = customerPurchasedCard[msg.sender][i];
+        }
+
+        return cardsPurchased;
+    }
+    // TODO : get list of avalaible card to buy
 
     function addPurchasedCard(address _user, string memory _cardId) 
     internal returns(uint256){
@@ -95,10 +133,10 @@ contract RailRoadSystem {
             customer: _user,
             createdAt : block.timestamp
         });
-        purchasedCards[purchaseCardCounts] = cardPurshased;
 
         // add customerPurchasedCard
-        customerPurchasedCard[_user] = purchaseCardCounts;
+        customerPurchasedCard[_user].push(cardPurshased);        
+        isCustomer[_user] = true;
 
         // reduce the card max quantity
         card.maxQuantity--;
@@ -106,7 +144,6 @@ contract RailRoadSystem {
         return purchaseCardCounts;
     }
 
-    // 1 wei - >1000000000000000000
     function purchaseCard(string memory _cardId) payable 
     public returns(uint256) {
 
