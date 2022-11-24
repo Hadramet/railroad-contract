@@ -31,6 +31,7 @@ library CardLib {
     }
 
     struct CardPurchased {
+        uint256 id;
         string cardId ;
         string cardName;
         string cardImageUri;
@@ -46,23 +47,29 @@ library CardLib {
 contract RailRoadSystem {
 
     address private owner;
-    
+    uint256 private purchaseCardCounts;
 
-    constructor (address _owner) {
+
+    constructor (address payable _owner) {
         owner = _owner;
     }
 
 
     // *************************************************************
-    // Storage for card
+    // Storage
     // *************************************************************
 
+
     // cardId => Card
-    mapping (string => CardLib.Card) public cards;
+    mapping(string => CardLib.Card) public cards;
 
-    // more here
-
+    // purchasedCardId => CardPurchased
+    mapping(uint256 => CardLib.CardPurchased ) private purchasedCards;
     
+    // customerAddress => purchasedCardId
+    mapping(address => uint256) public customerPurchasedCard; 
+
+
 
     // *************************************************************
     // Events
@@ -84,7 +91,57 @@ contract RailRoadSystem {
     // *************************************************************
     // Functions
     // *************************************************************
-    // 100000000000000000 wei --> 1eth
+
+    function addPurchasedCard(address _user, string memory _cardId) 
+    internal returns(uint256){
+
+        // get the card
+        CardLib.Card storage card = cards[_cardId] ;
+        
+        // add card purchased
+        purchaseCardCounts++;
+        CardLib.CardPurchased memory cardPurshased;
+        cardPurshased = CardLib.CardPurchased({
+            id: purchaseCardCounts,
+            cardId: _cardId,
+            cardName : card.name,
+            cardImageUri: card.imageUri,
+            cardPrice: card.price,
+            cardDiscountRatio: card.discountRatio,
+            cardDescription : card.description,
+            customer: _user,
+            createdAt : block.timestamp
+        });
+        purchasedCards[purchaseCardCounts] = cardPurshased;
+
+        // add customerPurchasedCard
+        customerPurchasedCard[_user] = purchaseCardCounts;
+
+        // reduce the card max quantity
+        card.maxQuantity--;
+
+        return purchaseCardCounts;
+    }
+
+    // 1 wei - >1000000000000000000
+    function purchaseCard(string memory _cardId) payable 
+    public returns(uint256) {
+
+        CardLib.Card storage card = cards[_cardId] ;
+
+        require(card.maxQuantity > 0, "There is not enough of this type of card for sales.");
+        require(msg.value == card.price, "The amount sent does not cover the price of the card");
+        
+        (bool sent, ) =  payable(owner).call{value: msg.value}("");
+
+        require(sent, "Failed to send Ether");
+        
+        (uint256 result) = addPurchasedCard(msg.sender, _cardId);
+
+        return result;
+
+    }
+
     function getOwner() public view returns(address){
         return owner;
     }
