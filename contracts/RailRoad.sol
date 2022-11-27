@@ -5,7 +5,6 @@ import "./RailRoadPermitOwnership.sol";
 import {RailRoadRes as Res} from "./RailRoadLib.sol";
 
 contract RailRoad is RailRoadPermitOwnership {
-
     constructor() RailRoadPermitOwnership("RailRoad", "RRO") {
         withdrawalAddress = msg.sender;
     }
@@ -31,5 +30,22 @@ contract RailRoad is RailRoadPermitOwnership {
         // TODO : Get the money
 
         return _newPermitId;
+    }
+
+    function buyPermitToken(uint256 _tokenId) external payable {
+
+        address buyer = msg.sender;
+        uint256 payedPrice = msg.value;
+
+        require(_exists(_tokenId));
+        require(getApproved(_tokenId) == address(this));
+        require(payedPrice == getTokenSalePrice(_tokenId));
+
+        // TODO: 
+        // pay the seller      
+
+        transferFrom(ownerOf(_tokenId), buyer, _tokenId);
+
+        removeTokenForSale(_tokenId);
     }
 }
