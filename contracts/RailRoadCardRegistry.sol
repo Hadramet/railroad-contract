@@ -52,7 +52,7 @@ contract RailRoadCardRegistry is RailRoadBase {
     }
 
     // Cost for number of Card
-    function costForNumberOf(uint256 _cardId, uint256 number) external view returns(uint256) {
+    function costForNumberOf(uint256 _cardId, uint256 number) public view returns(uint256) {
         require(_isCardExist(_cardId));
         return cards[_cardId].price * number;
     }

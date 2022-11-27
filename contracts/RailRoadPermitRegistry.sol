@@ -23,7 +23,7 @@ contract RailRoadPermitRegistry is RailRoadCardRegistry {
     Permit[] permits;
 
     modifier onlyOwnerOf(uint256 _tokenId) {
-        require(_ownerOf(_tokenId) == msg.sender);
+        require(_permitOwner(_tokenId) == msg.sender);
         _;
     }
 
@@ -33,7 +33,7 @@ contract RailRoadPermitRegistry is RailRoadCardRegistry {
 
     // permit owner
     function premitOwner(uint256 _tokenId) external view returns (address) {
-        return _ownerOf(_tokenId);
+        return _permitOwner(_tokenId);
     }
 
     // permit infos
@@ -49,7 +49,7 @@ contract RailRoadPermitRegistry is RailRoadCardRegistry {
         return (
             _permitCardId(_tokenId),
             _permitIssuedTime(_tokenId),
-            _ownerOf(_tokenId)
+            _permitOwner(_tokenId)
         );
     }
 
@@ -60,7 +60,7 @@ contract RailRoadPermitRegistry is RailRoadCardRegistry {
     //add permit (internal)
     function _addPermit(uint256 _cardId, address _owner)
         internal
-        returns (uint256 tokenId)
+        returns (uint256)
     {
         require(_isCardExist(_cardId));
         require(_owner != address(0));
@@ -88,26 +88,26 @@ contract RailRoadPermitRegistry is RailRoadCardRegistry {
         return _permitId;
     }
 
-    function _permitCardId(uint256 _tokenId) internal view returns (uint256) {
-        require(_isValidToken(_tokenId));
-        return permits[_tokenId].cardId;
+    function _permitCardId(uint256 _permitId) internal view returns (uint256) {
+        require(_isValidPermit(_permitId));
+        return permits[_permitId].cardId;
     }
 
-    function _permitIssuedTime(uint256 _tokenId)
+    function _permitIssuedTime(uint256 _permitId)
         internal
         view
         returns (uint256)
     {
-        require(_isValidToken(_tokenId));
-        return permits[_tokenId].issuedTime;
+        require(_isValidPermit(_permitId));
+        return permits[_permitId].issuedTime;
     }
 
-    function _ownerOf(uint256 _tokenId) internal view returns (address) {
-        require(_isValidToken(_tokenId));
-        return permits[_tokenId].owner;
+    function _permitOwner(uint256 _permitId) internal view returns (address) {
+        require(_isValidPermit(_permitId));
+        return permits[_permitId].owner;
     }
 
-    function _isValidToken(uint256 _tokenId) internal view returns (bool) {
-        return permits[_tokenId].cardId != 0;
+    function _isValidPermit(uint256 _permitId) internal view returns (bool) {
+        return permits[_permitId].cardId != 0;
     }
 }

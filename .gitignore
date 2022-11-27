@@ -3,3 +3,4 @@ artifacts/
 2_Owner.sol
 3_Ballot.sol
 .deps
+.debugger/
