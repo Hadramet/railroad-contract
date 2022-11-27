@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 import "./RailRoadPermitOwnership.sol";
+import {RailRoadRes as Res} from "./RailRoadLib.sol";
 
 /**
  * @title RailRoad is the entry point of the contract
@@ -15,7 +16,7 @@ contract RailRoad is RailRoadPermitOwnership {
         external
         onlyOwner
     {
-        require(_newWithdrawalAddress != address(0));
+        require(_newWithdrawalAddress != address(0), Res.invalid_address);
         withdrawalAddress = _newWithdrawalAddress;
     }
 
@@ -26,14 +27,11 @@ contract RailRoad is RailRoadPermitOwnership {
         payable
         returns (uint256)
     {
-        require(
-            _isCardExist(_cardId),
-            "Should provide a valid card informations."
-        );
-        require(_quantity != 0, "Quantity to buy must be more that zero.");
+        require(_isCardExist(_cardId), Res.invalid_card);
+        require(_quantity != 0, Res.invalid_card_quantity);
         require(
             msg.value == costForNumberOf(_cardId, _quantity),
-            "Value should be equale to the price of the card times the quantity."
+            Res.invalid_card_value
         );
 
         _purchaseOneCard(_cardId);
