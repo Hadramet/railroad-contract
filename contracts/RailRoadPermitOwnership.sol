@@ -2,10 +2,9 @@
 pragma solidity ^0.8.4;
 import "./RailRoadPermitRegistry.sol";
 import "./RailRoadERC721.sol";
-import {RailRoadRes as Res, RailRoadMath as Math} from "./RailRoadLib.sol";
+import {RailRoadRes as Res} from "./RailRoadLib.sol";
 
 contract RailRoadPermitOwnership is RailRoadPermitRegistry, RailRoadERC721 {
-    using Math for uint256;
 
     // Total amount of tokens
     uint256 private totalTokens;
@@ -123,7 +122,7 @@ contract RailRoadPermitOwnership is RailRoadPermitRegistry, RailRoadERC721 {
     {
         return
             interfaceID == this.supportsInterface.selector || // ERC165
-            interfaceID == 0x6466353c; // ERC-721 on 3/7/2018
+            interfaceID == 0x80ac58cd; // ERC-721
     }
 
     // ********************************************************************
@@ -133,7 +132,7 @@ contract RailRoadPermitOwnership is RailRoadPermitRegistry, RailRoadERC721 {
     function _mint(address _to, uint256 _tokenId) internal {
         require(_to != address(0), Res.invalid_address);
         _addToken(_to, _tokenId);
-        emit Transfer(address(0),_to,_tokenId);
+        emit Transfer(address(0), _to, _tokenId);
     }
 
     function _setApprovalForAll(address _operator, bool _approved) internal {
@@ -203,7 +202,7 @@ contract RailRoadPermitOwnership is RailRoadPermitRegistry, RailRoadERC721 {
 
         // Remove token
         uint256 tokenIndex = ownedTokensIndex[_tokenId];
-        uint256 lastTokenIndex = _balanceOf(_from).sub(1);
+        uint256 lastTokenIndex = _balanceOf(_from) - 1;
         uint256 lastToken = ownedTokens[_from][lastTokenIndex];
 
         tokenOwner[_tokenId] = address(0);
@@ -213,7 +212,7 @@ contract RailRoadPermitOwnership is RailRoadPermitRegistry, RailRoadERC721 {
         ownedTokens[_from].pop();
         ownedTokensIndex[_tokenId] = 0;
         ownedTokensIndex[lastToken] = tokenIndex;
-        totalTokens = totalTokens.sub(1);
+        totalTokens--;
 
         // add token
         _addToken(_to, _tokenId);
@@ -227,7 +226,7 @@ contract RailRoadPermitOwnership is RailRoadPermitRegistry, RailRoadERC721 {
         uint256 length = _balanceOf(_to);
         ownedTokens[_to].push(_tokenId);
         ownedTokensIndex[_tokenId] = length;
-        totalTokens = totalTokens.add(1);
+        totalTokens++;
     }
 
     function _ownerOf(uint256 _tokenId) internal view returns (address) {
@@ -237,7 +236,7 @@ contract RailRoadPermitOwnership is RailRoadPermitRegistry, RailRoadERC721 {
     }
 
     function _balanceOf(address _owner) internal view returns (uint256) {
-        require(_owner != address(0),Res.invalid_address);
+        require(_owner != address(0), Res.invalid_address);
         return ownedTokens[_owner].length;
     }
 
