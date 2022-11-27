@@ -1,26 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
+
 import "./RailRoadPermitOwnership.sol";
 import {RailRoadRes as Res} from "./RailRoadLib.sol";
 
-/**
- * @title RailRoad is the entry point of the contract
- */
 contract RailRoad is RailRoadPermitOwnership {
-    constructor() {
-        ownerAddress = msg.sender;
+
+    constructor() RailRoadPermitOwnership("RailRoad", "RRO") {
         withdrawalAddress = msg.sender;
     }
-
-    function setWithdrawalAddress(address _newWithdrawalAddress)
-        external
-        onlyOwner
-    {
-        require(_newWithdrawalAddress != address(0), Res.invalid_address);
-        withdrawalAddress = _newWithdrawalAddress;
-    }
-
-    ///// Selling Permit
 
     function buyPermit(uint256 _cardId, uint256 _quantity)
         external
@@ -42,6 +30,6 @@ contract RailRoad is RailRoadPermitOwnership {
 
         // TODO : Get the money
 
-        return 0;
+        return _newPermitId;
     }
 }

@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-contract RailRoadBase {
+import "@openzeppelin/contracts/access/Ownable.sol";
+import {RailRoadRes as Res} from "./RailRoadLib.sol";
 
-    address public ownerAddress;
+
+contract RailRoadBase is Ownable {
+
     address public withdrawalAddress;
-
-    modifier onlyOwner() {
-        require(msg.sender == ownerAddress);
-        _;
-    }
 
     struct Card {
         uint256 id;
@@ -21,4 +19,12 @@ contract RailRoadBase {
         string uri;
     }
 
+    
+    function setWithdrawalAddress(address _newWithdrawalAddress)
+        external
+        onlyOwner
+    {
+        require(_newWithdrawalAddress != address(0), Res.invalid_address);
+        withdrawalAddress = _newWithdrawalAddress;
+    }
 }
