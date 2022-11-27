@@ -2,13 +2,10 @@
 pragma solidity ^0.8.4;
 import "./RailRoadCardRegistry.sol";
 
-
 /**
  * @title RailRoad is the entry point of the contract
  */
 contract RailRoad is RailRoadCardRegistry {
-    
-
     constructor() {
         ownerAddress = msg.sender;
         withdrawalAddress = msg.sender;
@@ -22,11 +19,6 @@ contract RailRoad is RailRoadCardRegistry {
         withdrawalAddress = _newWithdrawalAddress;
     }
 
-    ///// CARD
+    ///// PERMITS
 
-    
-
-    
-
-    
 }

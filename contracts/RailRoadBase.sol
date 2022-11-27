@@ -21,11 +21,4 @@ contract RailRoadBase {
         string uri;
     }
 
-    struct Permit {
-        uint256 cardId;
-        uint256 issuedTime;
-        address owner;
-    }
-
-
 }
